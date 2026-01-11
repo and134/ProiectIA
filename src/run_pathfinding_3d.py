@@ -2,7 +2,7 @@ from pso_algorithm import PSO
 from problem_pathfinding_3d import PathfindingProblem3D
 from visualization_3d import plot_pathfinding_3d_static, animate_pathfinding_3d
 
-if __name__ == "__main__":
+def run():
     print("=== PSO Pathfinding 3D ===")
 
     start = (5, 5, 5)
@@ -27,3 +27,6 @@ if __name__ == "__main__":
 
     print("2. Afisare Rezultat Final...")
     plot_pathfinding_3d_static(history, problem, best_pos)
+
+if __name__ == "__main__":
+    run()

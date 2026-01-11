@@ -21,22 +21,9 @@ class PathfindingProblem:
             bounds.append((0, 100))
         return bounds
 
-    def _check_collision(self, p1, p2):
+    def _is_point_in_obstacle(self, point):
         for (ox, oy, r) in self.obstacles:
-            obstacle_center = np.array([ox, oy])
-            d_vec = p2 - p1
-            f_vec = p1 - obstacle_center
-
-            d2 = np.dot(d_vec, d_vec)
-            if d2 == 0: continue
-
-            t = -np.dot(f_vec, d_vec) / d2
-            t = np.clip(t, 0, 1)
-
-            closest_point = p1 + t * d_vec
-            distance = np.linalg.norm(closest_point - obstacle_center)
-
-            if distance < r:
+            if np.linalg.norm(point - np.array([ox, oy])) < r:
                 return True
         return False
 
@@ -55,6 +42,10 @@ class PathfindingProblem:
             total_distance += dist
 
             if self._check_collision(p1, p2):
-                penalty += 1000
+                samples = 5
+                for t in np.linspace(0, 1, samples):
+                    sample_point = p1 + t * (p2 - p1)
+                    if self._is_point_in_obstacle(sample_point):
+                        penalty += 200
 
         return total_distance + penalty

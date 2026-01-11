@@ -2,6 +2,11 @@ import sys
 import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
+from src import main as app_pathfinding_2d
+from src import run_pathfinding_3d
+from src import run_wifi
+from src import run_wifi_3d
+from src import compare
 
 def main():
     while True:
@@ -16,15 +21,15 @@ def main():
         choice = input("\nAlege o optiune: ")
 
         if choice == '1':
-            os.system('python src/main.py')
+            app_pathfinding_2d.main()
         elif choice == '2':
-            os.system('python src/run_pathfinding_3d.py')
+            run_pathfinding_3d.run()
         elif choice == '3':
-            os.system('python src/run_wifi.py')
+            run_wifi.run()
         elif choice == '4':
-            os.system('python src/run_wifi_3d.py')
+            run_wifi_3d.run()
         elif choice == '5':
-            os.system('python src/compare.py')
+            compare.run_comparison()
         elif choice == '0':
             print("Ceao")
             break

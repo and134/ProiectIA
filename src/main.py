@@ -3,7 +3,7 @@ from pso_algorithm import PSO
 from problem_pathfinding import PathfindingProblem
 from visualization import plot_pathfinding, animate_pathfinding_evolution
 
-if __name__ == "__main__":
+def main():
     start = (5, 5)
     end = (95, 95)
     nr_puncte_control = 10
@@ -25,8 +25,12 @@ if __name__ == "__main__":
 
     print(f"Cel mai bun cost: {best_val:.2f}")
 
-    print("Se generează animația...")
+    print("Se genereaza animația...")
 
     animate_pathfinding_evolution(history, problem)
     print("Rezultatul optim")
     plot_pathfinding(history, problem, best_pos, title="PSO Pathfinding - Rezultat Final")
+
+
+if __name__ == "__main__":
+    main()
