@@ -22,10 +22,11 @@ except ImportError:
     from src.problem_wifi import WifiProblem
     from src.problem_wifi_3d import WifiProblem3D
 
+
 class PSOInterface:
     def __init__(self, root):
         self.root = root
-        self.root.title("PSO Visualization Studio - v1.0 (Beta)")
+        self.root.title("PSO Visualization Studio - v2.1 (Stable)")
         self.root.geometry("1200x850")
 
         self.is_running = False
@@ -127,8 +128,8 @@ class PSOInterface:
         self.fig.clf()
         self.canvas.draw()
 
-        self.log_text.config(state="normal")
-        self.log_text.delete(1.0, tk.END)
+        self.log_text.config(state="normal");
+        self.log_text.delete(1.0, tk.END);
         self.log_text.config(state="disabled")
 
         self.btn_start.config(state="disabled", text="Se calculează...", bg="#FFC107")
@@ -150,12 +151,10 @@ class PSOInterface:
                 self.problem_instance = PathfindingProblem((5, 5), (95, 95), complexity)
             elif mode == "Pathfinding 3D":
                 self.problem_instance = PathfindingProblem3D((5, 5, 5), (95, 95, 95), complexity)
-            elif "Wi-Fi" in mode:
-                # Placeholder pentru commit-ul viitor
-                if mode == "Wi-Fi 2D":
-                    self.problem_instance = WifiProblem(n_routers=complexity, signal_radius=35)
-                else:
-                    self.problem_instance = WifiProblem3D(n_routers=complexity, signal_radius=45)
+            elif mode == "Wi-Fi 2D":
+                self.problem_instance = WifiProblem(n_routers=complexity, signal_radius=35)
+            elif mode == "Wi-Fi 3D":
+                self.problem_instance = WifiProblem3D(n_routers=complexity, signal_radius=45)
 
             pso = PSO(
                 objective_function=self.problem_instance.fitness_function,
@@ -192,10 +191,10 @@ class PSOInterface:
             self._anim_path_2d()
         elif mode == "Pathfinding 3D":
             self._anim_path_3d()
-        else:
-            self.log("Vizualizare Wi-Fi in lucru...")
-            self.finish_sequence()
-            return
+        elif mode == "Wi-Fi 2D":
+            self._anim_wifi_2d()
+        elif mode == "Wi-Fi 3D":
+            self._anim_wifi_3d()
 
         self.canvas.draw()
 
@@ -213,7 +212,11 @@ class PSOInterface:
         else:
             self.ax = self.fig.add_subplot(111)
 
-        if mode == "Pathfinding 2D":
+        if mode == "Wi-Fi 2D":
+            self._draw_final_wifi_2d()
+        elif mode == "Wi-Fi 3D":
+            self._draw_final_wifi_3d()
+        elif mode == "Pathfinding 2D":
             self._draw_final_path_2d()
         elif mode == "Pathfinding 3D":
             self._draw_final_path_3d()
@@ -223,13 +226,13 @@ class PSOInterface:
     def _anim_path_2d(self):
         prob = self.problem_instance
         self.ax.set_title("Evoluție Pathfinding 2D")
-        self.ax.set_xlim(0, 100)
+        self.ax.set_xlim(0, 100);
         self.ax.set_ylim(0, 100)
         self.ax.grid(True, linestyle='--')
 
         for (ox, oy, r) in prob.obstacles:
             self.ax.add_patch(patches.Circle((ox, oy), r, color='gray', alpha=0.5))
-        self.ax.plot(*prob.start, 'gs', ms=10)
+        self.ax.plot(*prob.start, 'gs', ms=10);
         self.ax.plot(*prob.end, 'rx', ms=10)
 
         lines = [self.ax.plot([], [], 'c-', alpha=0.2)[0] for _ in range(len(self.history[0]))]
@@ -251,7 +254,7 @@ class PSOInterface:
     def _draw_final_path_2d(self):
         prob = self.problem_instance
         self.ax.set_title("Rezultat Final Pathfinding 2D")
-        self.ax.set_xlim(0, 100)
+        self.ax.set_xlim(0, 100);
         self.ax.set_ylim(0, 100)
 
         for (ox, oy, r) in prob.obstacles:
@@ -260,15 +263,71 @@ class PSOInterface:
         pts = self.best_pos.reshape((prob.num_waypoints, 2))
         full = np.vstack([prob.start, pts, prob.end])
         self.ax.plot(full[:, 0], full[:, 1], 'b-', linewidth=3, label="Traseu Optim")
-        self.ax.plot(*prob.start, 'gs', ms=10)
+        self.ax.plot(*prob.start, 'gs', ms=10);
         self.ax.plot(*prob.end, 'rx', ms=10)
         self.ax.legend()
+
+    def _anim_wifi_2d(self):
+        prob = self.problem_instance
+        self.ax.set_title("Optimizare Wi-Fi...")
+        self.ax.set_xlim(0, 100);
+        self.ax.set_ylim(0, 100)
+
+        for (wx, wy, w, h) in prob.walls:
+            self.ax.add_patch(patches.Rectangle((wx, wy), w, h, facecolor='black'))
+
+        scat = self.ax.scatter([], [], c='blue')
+
+        def update(frame):
+            if frame == len(self.history) - 1:
+                self.root.after(100, self.finish_sequence)
+
+            pop = self.history[frame]
+            xs, ys = [], []
+            for p in pop:
+                r = p.reshape((prob.n_routers, 2))
+                xs.extend(r[:, 0]);
+                ys.extend(r[:, 1])
+            scat.set_offsets(np.c_[xs, ys])
+
+        self.current_anim = animation.FuncAnimation(self.fig, update, frames=len(self.history), interval=50,
+                                                    repeat=False)
+
+    def _draw_final_wifi_2d(self):
+        prob = self.problem_instance
+        self.ax.set_title("Heatmap Acoperire Wi-Fi")
+        self.ax.set_xlim(0, 100);
+        self.ax.set_ylim(0, 100)
+
+        res = 100
+        x = np.linspace(0, 100, res);
+        y = np.linspace(0, 100, res)
+        X, Y = np.meshgrid(x, y)
+        Z = np.zeros_like(X)
+
+        routers = self.best_pos.reshape((prob.n_routers, 2))
+
+        for i in range(res):
+            for j in range(res):
+                px, py = X[i, j], Y[i, j]
+                dists = [np.linalg.norm([px - r[0], py - r[1]]) for r in routers]
+                md = min(dists)
+                if md < prob.radius: Z[i, j] = 1 - (md / prob.radius)
+
+        self.ax.imshow(Z, extent=(0, 100, 0, 100), origin='lower', cmap='YlGnBu', alpha=0.7)
+
+        for (wx, wy, w, h) in prob.walls:
+            self.ax.add_patch(patches.Rectangle((wx, wy), w, h, facecolor='black'))
+
+        for r in routers:
+            self.ax.scatter(*r, c='red', marker='^', s=100, edgecolors='white')
+            self.ax.add_patch(patches.Circle(r, prob.radius, fill=False, edgecolor='red', linestyle='--'))
 
     def _anim_path_3d(self):
         prob = self.problem_instance
         self.ax.set_title("Pathfinding 3D")
-        self.ax.set_xlim(0, 100)
-        self.ax.set_ylim(0, 100)
+        self.ax.set_xlim(0, 100);
+        self.ax.set_ylim(0, 100);
         self.ax.set_zlim(0, 100)
 
         for (ox, oy, oz, r) in prob.obstacles:
@@ -307,6 +366,47 @@ class PSOInterface:
         self.ax.plot(full[:, 0], full[:, 1], full[:, 2], 'b-', linewidth=3)
         self.ax.scatter(*prob.start, c='green', s=100)
         self.ax.scatter(*prob.end, c='red', s=100)
+
+    def _anim_wifi_3d(self):
+        prob = self.problem_instance
+        self.ax.set_title("Wi-Fi 3D")
+        self.ax.set_xlim(0, 100);
+        self.ax.set_ylim(0, 100);
+        self.ax.set_zlim(0, 100)
+
+        scat = self.ax.scatter([], [], [], c='red')
+
+        def update(frame):
+            if frame == len(self.history) - 1:
+                self.root.after(100, self.finish_sequence)
+
+            pop = self.history[frame]
+            xs, ys, zs = [], [], []
+            for p in pop:
+                r = p.reshape((prob.n_routers, 3))
+                xs.extend(r[:, 0]);
+                ys.extend(r[:, 1]);
+                zs.extend(r[:, 2])
+            scat._offsets3d = (xs, ys, zs)
+
+        self.current_anim = animation.FuncAnimation(self.fig, update, frames=len(self.history), interval=60,
+                                                    repeat=False)
+
+    def _draw_final_wifi_3d(self):
+        prob = self.problem_instance
+        self.ax.set_title("Sfere Acoperire 3D")
+
+        routers = self.best_pos.reshape((prob.n_routers, 3))
+        u = np.linspace(0, 2 * np.pi, 15)
+        v = np.linspace(0, np.pi, 15)
+
+        for r in routers:
+            self.ax.scatter(*r, c='red', s=100, marker='^')
+            x = r[0] + prob.radius * np.outer(np.cos(u), np.sin(v))
+            y = r[1] + prob.radius * np.outer(np.sin(u), np.sin(v))
+            z = r[2] + prob.radius * np.outer(np.ones(np.size(u)), np.cos(v))
+            self.ax.plot_wireframe(x, y, z, color='blue', alpha=0.2)
+
 
 if __name__ == "__main__":
     root = tk.Tk()
