@@ -3,7 +3,7 @@ from pso_algorithm import PSO
 from problem_wifi import WifiProblem
 from visualization import plot_wifi_coverage, animate_wifi_evolution
 
-if __name__ == "__main__":
+def run():
     print("=== Rulare PSO pentru Acoperire Wi-Fi ===")
 
     problem = WifiProblem(room_size=(100, 100), n_routers=3, signal_radius=35)
@@ -30,3 +30,6 @@ if __name__ == "__main__":
 
     print("2. Afișare Heatmap final...")
     plot_wifi_coverage(history, problem, best_pos)
+
+if __name__ == "__main__":
+    run()

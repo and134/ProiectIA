@@ -2,7 +2,7 @@ from pso_algorithm import PSO
 from problem_wifi_3d import WifiProblem3D
 from visualization_3d import plot_wifi_3d_static, animate_wifi_3d
 
-if __name__ == "__main__":
+def run():
     print("=== PSO Wi-Fi Coverage 3D ===")
 
     problem = WifiProblem3D(room_size=(100, 100, 100), n_routers=3, signal_radius=45)
@@ -24,3 +24,6 @@ if __name__ == "__main__":
 
     print("2. Rezultat Final (Sfere de semnal)...")
     plot_wifi_3d_static(history, problem, best_pos)
+
+    if __name__ == "__main__":
+        run()
