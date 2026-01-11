@@ -1,7 +1,7 @@
 import numpy as np
 from pso_algorithm import PSO
 from problem_pathfinding import PathfindingProblem
-from src.visualization import animate_pathfinding_evolution
+from visualization import plot_pathfinding, animate_pathfinding_evolution
 
 if __name__ == "__main__":
     start = (5, 5)
@@ -29,3 +29,4 @@ if __name__ == "__main__":
 
     animate_pathfinding_evolution(history, problem)
     print("Rezultatul optim")
+    plot_pathfinding(history, problem, best_pos, title="PSO Pathfinding - Rezultat Final")
