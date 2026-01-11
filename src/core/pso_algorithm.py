@@ -12,17 +12,14 @@ class Particle:
 
 
 class PSO:
-    def __init__(
-        self, objective_function, bounds, num_particles, max_iter,
-        w_start=0.9, w_end=0.4, c1=1.49, c2=1.49,
-        topology='global', neighbor_size=3
-    ):
+    def __init__(self, objective_function, bounds, num_particles, max_iter,
+                 w_start=0.9, w_end=0.4, c1=1.49, c2=1.49,
+                 topology='global', neighbor_size=3):
         self.fitness_func = objective_function
         self.bounds = bounds
         self.dim = len(bounds)
         self.num_particles = num_particles
         self.max_iter = max_iter
-
 
         self.w_start = w_start
         self.w_end = w_end
@@ -43,25 +40,22 @@ class PSO:
         self.cost_history = []
 
     def _get_social_target(self, particle_index):
-
         if self.topology == 'global':
             return self.global_best_position
 
         neighbors_indices = []
 
         if self.topology == 'social':
-
             start = particle_index - (self.neighbor_size // 2)
             for i in range(start, start + self.neighbor_size):
                 neighbors_indices.append(i % self.num_particles)
 
         elif self.topology == 'geographic':
-
             current_pos = self.swarm[particle_index].position
             all_positions = np.array([p.position for p in self.swarm])
+
             dists = np.linalg.norm(all_positions - current_pos, axis=1)
             neighbors_indices = np.argsort(dists)[:self.neighbor_size]
-
 
         best_neighbor_val = float('inf')
         best_neighbor_pos = self.swarm[particle_index].best_position
@@ -75,7 +69,6 @@ class PSO:
 
     def optimize(self):
         for iteration in range(self.max_iter):
-
             self.w = self.w_start - (self.w_start - self.w_end) * (iteration / self.max_iter)
 
             self.history.append([p.position.copy() for p in self.swarm])
@@ -94,7 +87,6 @@ class PSO:
 
             self.cost_history.append(self.global_best_value)
 
-
             for i, particle in enumerate(self.swarm):
                 target_social = self._get_social_target(i)
                 r1 = np.random.random(self.dim)
@@ -107,6 +99,7 @@ class PSO:
                 particle.velocity = np.clip(particle.velocity, -self.v_max, self.v_max)
                 particle.position += particle.velocity
 
-
                 for d in range(self.dim):
                     particle.position[d] = max(self.bounds[d][0], min(particle.position[d], self.bounds[d][1]))
+
+        return self.global_best_position, self.global_best_value, self.history, self.cost_history

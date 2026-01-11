@@ -59,4 +59,4 @@ class PathfindingProblem3D:
             if self._check_collision(p1, p2):
                 penalty += 1000
 
-        return penalty + total_distance
+        return total_distance + penalty

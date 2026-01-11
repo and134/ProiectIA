@@ -1,6 +1,5 @@
 import numpy as np
 
-
 class PathfindingProblem:
     def __init__(self, start_pos, end_pos, num_waypoints):
         self.start = np.array(start_pos)
@@ -41,11 +40,10 @@ class PathfindingProblem:
             dist = np.linalg.norm(p2 - p1)
             total_distance += dist
 
-            if self._check_collision(p1, p2):
-                samples = 5
-                for t in np.linspace(0, 1, samples):
-                    sample_point = p1 + t * (p2 - p1)
-                    if self._is_point_in_obstacle(sample_point):
-                        penalty += 200
+            samples = 5
+            for t in np.linspace(0, 1, samples):
+                sample_point = p1 + t * (p2 - p1)
+                if self._is_point_in_obstacle(sample_point):
+                    penalty += 200
 
         return total_distance + penalty
