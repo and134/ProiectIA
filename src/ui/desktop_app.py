@@ -8,19 +8,19 @@ import matplotlib.animation as animation
 import matplotlib.patches as patches
 
 try:
-    from pso_algorithm import PSO
+    from src.core.pso_algorithm import PSO
     from problem_pathfinding import PathfindingProblem
     from problem_pathfinding_3d import PathfindingProblem3D
     from problem_wifi import WifiProblem
     from problem_wifi_3d import WifiProblem3D
 except ImportError:
     import sys, os
-    sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-    from src.pso_algorithm import PSO
-    from src.problem_pathfinding import PathfindingProblem
-    from src.problem_pathfinding_3d import PathfindingProblem3D
-    from src.problem_wifi import WifiProblem
-    from src.problem_wifi_3d import WifiProblem3D
+    sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
+    from src.core.pso_algorithm import PSO
+    from src.problems.problem_pathfinding import PathfindingProblem
+    from src.problems.problem_pathfinding_3d import PathfindingProblem3D
+    from src.problems.problem_wifi import WifiProblem
+    from src.problems.problem_wifi_3d import WifiProblem3D
 
 
 class PSOInterface:
