@@ -41,11 +41,13 @@ C = {
 class PSOInterface:
     def __init__(self, root):
         self.root = root
-        self.root.title("PSO Studio - macOS Compatible")
+        self.root.title("PSO Studio")
         self.root.geometry("1300x850")
         self.root.configure(bg=C["bg_main"])
 
         self.problem_mode = tk.StringVar(value="Pathfinding 2D")
+        self.topology_mode = tk.StringVar(value="global")
+
         self.var_part = tk.DoubleVar(value=40)
         self.var_iter = tk.DoubleVar(value=100)
         self.var_complex = tk.DoubleVar(value=5)
@@ -94,6 +96,11 @@ class PSOInterface:
                              "STUDIU COMPARATIV (Pathfinding)")
         prob_cb.pack(fill=tk.X, padx=15, pady=5)
         prob_cb.bind("<<ComboboxSelected>>", self._on_mode_change)
+
+        self._add_label(sidebar, "Topologie:")
+        topo_cb = ttk.Combobox(sidebar, textvariable=self.topology_mode, state="readonly")
+        topo_cb['values'] = ("Global", "Social", "Geographic")
+        topo_cb.pack(fill=tk.X, padx=15, pady=5)
 
         tk.Frame(sidebar, bg="#555", height=2).pack(fill=tk.X, padx=15, pady=20)
 
@@ -197,6 +204,8 @@ class PSOInterface:
     def run_simulation_logic(self):
         try:
             mode = self.problem_mode.get()
+            topo = self.topology_mode.get()
+
             n_part = int(self.var_part.get())
             n_iter = int(self.var_iter.get())
             comp = int(self.var_complex.get())
@@ -211,8 +220,13 @@ class PSOInterface:
             elif mode == "Wi-Fi 3D":
                 self.problem_instance = WifiProblem3D(n_routers=comp, signal_radius=45)
 
-            pso = PSO(self.problem_instance.fitness_function, self.problem_instance.get_bounds(), n_part, n_iter,
-                      topology='global')
+            pso = PSO(self.problem_instance.fitness_function,
+                      self.problem_instance.get_bounds(),
+                      n_part,
+                      n_iter,
+                      topology=topo,
+                      neighbor_size=5)
+
             best_pos, best_val, history, _ = pso.optimize()
             self.history = history;
             self.best_pos = best_pos
